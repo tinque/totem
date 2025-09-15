@@ -9,7 +9,7 @@ type Contact struct {
 	FirstName    string
 	LastName     string
 	Emails       map[EmailType]string // Emails par type
-	Birthday     time.Time
+	Birthday     *time.Time
 	Address      string
 	City         string
 	ZipCode      string

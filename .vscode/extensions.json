@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "mechatroner.rainbow-csv",
         "golang.go"
     ]
 }

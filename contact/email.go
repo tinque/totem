@@ -3,8 +3,8 @@ package contact
 type EmailType string
 
 const (
-	PersonalEmail      EmailType = "Personal"
-	DedicatedSGDFEmail EmailType = "DedicatedSGDF"
+	EmailPersonal      EmailType = "Personal"
+	EmailDedicatedSGDF EmailType = "DedicatedSGDF"
 )
 
 func (c *Contact) GetEmail(et EmailType) string {
@@ -22,7 +22,7 @@ func (c *Contact) SetEmail(et EmailType, email string) {
 }
 
 func (c *Contact) FirstEmail() string {
-	order := []EmailType{PersonalEmail, DedicatedSGDFEmail}
+	order := []EmailType{EmailPersonal, EmailDedicatedSGDF}
 	for _, et := range order {
 		if email := c.GetEmail(et); email != "" {
 			return email
