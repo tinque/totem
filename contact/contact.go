@@ -15,6 +15,6 @@ type Contact struct {
 	ZipCode      string
 	Country      string
 	Phones       map[PhoneType]string // Numéros de téléphone par type
-	Title        string
+	Position     string
 	Labels       []Label
 }
