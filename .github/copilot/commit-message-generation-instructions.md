@@ -1,36 +1,21 @@
-Generate commit messages that STRICTLY follow the Conventional Commits format: <type>(<scope>): <subject>
 
-## MANDATORY OUTPUT FORMAT:
 
-**YOU MUST GENERATE EXACTLY THIS PATTERN:**
+# Commit Message Generation Instructions (Totem project)
+
+Generate commit messages STRICTLY following the commitlint configuration for Conventional Commits format: `<type>(<scope>): <subject>`
+
+## REQUIRED FORMAT:
 
 ```
-type(scope): lowercase imperative verb followed by description
+type(scope): lowercase imperative verb followed by concise description
 ```
 
-**NEVER GENERATE:**
-
-- Sentences starting with capital letters
-- Messages without type(scope): prefix
-- Past tense verbs (added, updated, fixed, removed)
-- Periods at the end
-
-## CRITICAL REQUIREMENTS:
-
-### 1. HEADER FORMAT (MANDATORY):
-
-- **EXACT FORMAT**: `<type>(<scope>): <subject>`
-- **Maximum 100 characters total**
-- **Must be all lowercase** (no capitals anywhere)
-- **No period at the end**
-- **Subject in imperative mood** (e.g., "add", "fix", "update", not "added", "fixed", "updated")
-
-### 2. ALLOWED TYPES (lowercase only):
+## ALLOWED TYPES (lowercase only):
 
 - `feat`: new feature
 - `fix`: bug fix
 - `docs`: documentation changes
-- `style`: formatting, white-space, etc.
+- `style`: formatting, whitespace, etc.
 - `refactor`: code changes that neither fix bugs nor add features
 - `perf`: performance improvements
 - `test`: adding or correcting tests
@@ -39,98 +24,59 @@ type(scope): lowercase imperative verb followed by description
 - `chore`: other changes that don't modify src or test files
 - `revert`: reverts a previous commit
 
-### 3. SCOPE (optional but recommended):
+## SCOPE (optional but recommended):
 
-- Use project/module names: `infra`, `api`, `webapp`, `core`, `shared`, etc.
-- Lowercase only: `(infra)`, `(api)`, `(core/event-store)`
+Use project/module names:
+- `address`, `contact`, `parser`, `main`, `infra`, etc.
+- Always lowercase, e.g. `(address)`, `(contact/email)`
 
-### 4. SUBJECT RULES:
+## SUBJECT:
 
-- **Start with lowercase letter**
-- **Imperative mood**: "replace env_name with resource_prefix", NOT "replaces" or "replaced"
-- **Be concise and specific**
-- **No punctuation at the end**
+- Start with a lowercase imperative verb (e.g., "add", "fix", "update", "remove")
+- Be concise and specific
+- No punctuation at the end
 
-### 5. EXAMPLES OF CORRECT FORMAT:
+## COMMITLINT VALIDATION RULES:
 
-```
-feat(api): add user authentication endpoint
-fix(infra): resolve terraform provider version conflicts
-refactor(infra): replace env_name with resource_prefix and environment flags
-docs(readme): update installation instructions
-chore(deps): bump terraform aws provider to 6.12.0
-```
+- [ ] **Header length**: 10-50 characters (including type, scope, and subject)
+- [ ] **Type**: Must be one of the allowed types above
+- [ ] **Format**: Exact format `type(scope): subject` or `type: subject`
+- [ ] **Subject**: Imperative, lowercase, no period at end
+- [ ] **Body lines**: Maximum 72 characters per line (if body is used)
+- [ ] **Footer lines**: Maximum 72 characters per line (if footer is used)
 
-**FOR YOUR CURRENT CHANGES, USE:**
-
-```
-refactor(infra): replace env_name with resource_prefix and environment flags
-```
-
-### 6. BODY (optional):
-
-- Leave blank line after header
-- Explain **what** and **why**, not how
-- Max 100 characters per line
-- Use imperative mood
-
-### 7. FOOTER (optional):
-
-- For breaking changes: `BREAKING CHANGE: <description>`
-- For issue references: `closes #123`
-
-## VALIDATION CHECKLIST:
-
-- [ ] Starts with allowed type in lowercase
-- [ ] Uses exact format `type(scope): subject`
-- [ ] Subject starts with lowercase verb in imperative mood
-- [ ] No period at end of subject
-- [ ] Total header ≤ 100 characters
-- [ ] No capitals except in breaking change footer
-
-## COMMON MISTAKES TO AVOID:
-
-❌ **WRONG**:
+## EXAMPLES FOR THIS PROJECT:
 
 ```
-Refactor infrastructure variables and resource naming conventions
-Update Terraform configuration to introduce resource prefix
-Added new boolean variables for environment detection
+feat(address): add postal validation        # 33 chars
+fix(contact): fix phone display             # 31 chars
+refactor(parser): simplify csv logic        # 37 chars
+docs: update commit instructions            # 32 chars
+test(contact): add email tests              # 30 chars
+chore: update dependencies                  # 26 chars
 ```
 
-✅ **CORRECT**:
+## IMPORTANT: CHARACTER COUNT
+
+**CRITICAL**: The entire header (type + scope + subject) MUST be ≤ 50 characters.
+
+Examples of headers that are TOO LONG:
+- ❌ `docs: update commit message instructions` (42 chars - OK)
+- ❌ `docs: update commit message generation instructions` (51 chars - TOO LONG!)
+
+Examples of correct length:
+- ✅ `docs: update commit instructions` (32 chars)
+- ✅ `docs: update commit rules` (26 chars)
+
+## BODY AND FOOTER (optional):
+
+If additional context is needed, use body and footer with max 72 characters per line:
 
 ```
-refactor(infra): replace env_name with resource_prefix and environment flags
-fix(terraform): resolve provider version conflicts
-feat(infra): add environment detection boolean variables
+feat(contact): add phone validation
+
+Implement comprehensive phone number validation
+for international formats including country codes.
+
+Closes #123
 ```
-
-## ENFORCEMENT RULES:
-
-**CRITICAL**: You MUST generate EXACTLY in this format:
-
-1. **NEVER start with a capital letter**
-2. **ALWAYS include type and colon**: `type(scope): `
-3. **ALWAYS use imperative mood in present tense**
-4. **NEVER use past tense verbs** (renamed, introduced, updated, adjusted, removed)
-5. **USE present tense imperatives**: replace, introduce, update, adjust, remove
-
-**OUTPUT FORMAT**: Generate ONLY the header `type(scope): subject` unless body/footer is specifically requested.
-
-**VALIDATION**: Every commit message MUST pass this regex: `^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9/-]+\))?: [a-z][^.]*[^.]$`
-
-## FINAL CHECK:
-
-Before generating any commit message, verify:
-
-1. ✅ Starts with lowercase type from allowed list
-2. ✅ Has format `type(scope): `
-3. ✅ Subject starts with lowercase imperative verb
-4. ✅ No period at end
-5. ✅ Under 100 characters total
-
-**EXAMPLE VALIDATION:**
-
-- ❌ `Refactor infrastructure variables` → Wrong (capital R, no type)
-- ✅ `refactor(infra): replace env_name with resource_prefix` → Correct
