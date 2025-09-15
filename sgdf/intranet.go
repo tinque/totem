@@ -24,6 +24,16 @@ func ExtractIntranetContact(row parser.Row) ([]contact.Contact, error) {
 	}
 	contacts = append(contacts, *mainContact)
 
+	for i := 1; i <= 3; i++ {
+		legalGuardianContact, err := extractIntranetLegalGardianContact(row, i)
+		if err != nil {
+			return nil, err
+		}
+		if legalGuardianContact != nil {
+			contacts = append(contacts, *legalGuardianContact)
+		}
+	}
+
 	return contacts, nil
 }
 
@@ -136,6 +146,97 @@ func extractIntranetMainContact(row parser.Row) (*contact.Contact, error) {
 			} else {
 				c.Position = string(GetPosition(i, gender))
 			}
+		}
+	}
+
+	// TODO: gérer les labels (bénévole, membre, etc.)
+	c.AddLabel(contact.LabelTest)
+
+	return &c, nil
+}
+
+func extractIntranetLegalGardianContact(row parser.Row, index int) (*contact.Contact, error) {
+	c := contact.Contact{}
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%dCivilite.NomCourt", index)]; ok {
+		if v == "" {
+			return nil, nil
+		}
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.CodeAdherent", index)]; ok {
+		c.CodeAdherant = v
+	}
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.Prenom", index)]; ok {
+		c.FirstName = capitalizer.String(v)
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.Nom", index)]; ok {
+		c.LastName = capitalizer.String(v)
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.CourrielPersonnel", index)]; ok {
+		c.SetEmail(contact.EmailPersonal, v)
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.CourrielDédiéSGDF", index)]; ok {
+		c.SetEmail(contact.EmailDedicatedSGDF, v)
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.Adresse.Ligne1", index)]; ok {
+		c.Address = address.FormatLine(v)
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.Adresse.Ligne2", index)]; ok {
+		if c.Address != "" && v != "" {
+			c.Address += "\n"
+		}
+		if v != c.Address && v != "" {
+			c.Address += address.FormatLine(v)
+		}
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.Adresse.Ligne3", index)]; ok {
+		if c.Address != "" && v != "" {
+			c.Address += "\n"
+		}
+		if v != c.Address && v != "" {
+			c.Address += address.FormatLine(v)
+		}
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.Adresse.CodePostal", index)]; ok {
+		c.ZipCode = v
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.Adresse.Municipalite", index)]; ok {
+		c.City = capitalizer.String(v)
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.Adresse.Pays", index)]; ok {
+		c.Country = capitalizer.String(v)
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.TelephoneDomicile", index)]; ok {
+		if v != "" {
+			c.SetPhone(contact.PhoneHome, v)
+		}
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.TelephonePortable1", index)]; ok {
+		if v != "" {
+			c.SetPhone(contact.PhoneMobile1, v)
+		}
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.TelephonePortable2", index)]; ok {
+		if v != "" {
+			c.SetPhone(contact.PhoneMobile2, v)
+		}
+	}
+
+	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.TelephoneBureau", index)]; ok {
+		if v != "" {
+			c.SetPhone(contact.PhoneWork, v)
 		}
 	}
 
