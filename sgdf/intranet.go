@@ -42,6 +42,7 @@ func extractIntranetMainContact(row parser.Row) (*contact.Contact, error) {
 
 	if v, ok := row["IndividuCivilite.CodeAdherent"]; ok {
 		c.CodeAdherant = v
+		c.AddLabel(contact.LabelAdherent)
 	}
 	if v, ok := row["Individu.Prenom"]; ok {
 		c.FirstName = capitalizer.String(v)
@@ -144,13 +145,14 @@ func extractIntranetMainContact(row parser.Row) (*contact.Contact, error) {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "error parsing position code %q: %v\n", v, err)
 			} else {
-				c.Position = string(GetPosition(i, gender))
+				c.Position = string(getPosition(i, gender))
+				labels := getLabel(i)
+				for _, l := range labels {
+					c.AddLabel(l)
+				}
 			}
 		}
 	}
-
-	// TODO: gérer les labels (bénévole, membre, etc.)
-	c.AddLabel(contact.LabelTest)
 
 	return &c, nil
 }
@@ -240,8 +242,7 @@ func extractIntranetLegalGardianContact(row parser.Row, index int) (*contact.Con
 		}
 	}
 
-	// TODO: gérer les labels (bénévole, membre, etc.)
-	c.AddLabel(contact.LabelTest)
+	c.AddLabel(contact.LabelParent)
 
 	return &c, nil
 }

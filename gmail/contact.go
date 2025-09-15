@@ -128,7 +128,7 @@ func CSVContact(c contact.Contact) []string {
 	if c.Birthday != nil {
 		row[getHeaderIndex("Birthday")] = c.Birthday.Format("2006-01-02")
 	}
-	row[getHeaderIndex("Labels")] = strings.Join(c.LabelsAsStrings(), " ")
+	row[getHeaderIndex("Labels")] = strings.Join(c.LabelsAsStrings(), " ::: ")
 
 	mapEmailsToCSV(row, c)
 	mapPhonesToCSV(row, c)

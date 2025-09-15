@@ -4,7 +4,32 @@ import "slices"
 
 type Label string
 
-const LabelTest Label = "TestTemporaire"
+const LabelAdherent Label = "Adhérent"
+const LabelBureau Label = "Bureau"
+const LabelChefCheftaine Label = "Chef-Cheftaine"
+const LabelParent Label = "Parent"
+const LabelEquipeDeGroupe Label = "Equipe de groupe"
+const LabelAncien Label = "Ancien"
+
+const LabelFarfadet Label = "Farfadet"
+const LabelParentFarfadet Label = "Parent Farfadet"
+const LabelResponsableFarfadet Label = "Responsable Farfadet"
+
+const LabelLouveteauJeannette Label = "Louveteau-Jeannette"
+const LabelParentLouveteauJeannette Label = "Parent Louveteau-Jeannette"
+const LabelChefCheftaineLouveteauJeannette Label = "Chef-Cheftaine Louveteau-Jeannette"
+
+const LabelPionnierCaravelle Label = "Pionnier-Caravelle"
+const LabelParentPionnierCaravelle Label = "Parent Pionnier-Caravelle"
+const LabelChefCheftainePionnierCaravelle Label = "Chef-Cheftaine Pionnier-Caravelle"
+
+const LabelScoutGuide Label = "Scout-Guide"
+const LabelParentScoutGuide Label = "Parent Scout-Guide"
+const LabelChefCheftaineScoutGuide Label = "Chef-Cheftaine Scout-Guide"
+
+const LabelCompagnon Label = "Compagnon"
+const LabelParentCompagnon Label = "Parent Compagnon"
+const LabelAccompagnateurCompagnon Label = "Accompagnateur Compagnon"
 
 func (c *Contact) AddLabel(label Label) {
 	if slices.Contains(c.Labels, label) {

@@ -100,7 +100,7 @@ var positionCodeMapping = map[int]map[Gender]Position{
 	},
 }
 
-func GetPosition(code int, gender Gender) Position {
+func getPosition(code int, gender Gender) Position {
 	if pos, ok := positionCodeMapping[code][gender]; ok {
 		return pos
 	}
