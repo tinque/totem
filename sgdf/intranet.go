@@ -30,6 +30,22 @@ func ExtractIntranetContact(row parser.Row) ([]contact.Contact, error) {
 			return nil, err
 		}
 		if legalGuardianContact != nil {
+
+			switch mainContact.Position {
+			case string(PositionFarfadet):
+				legalGuardianContact.AddLabel(contact.LabelParentFarfadet)
+			case string(PositionLouveteau), string(PositionJeannette):
+				legalGuardianContact.AddLabel(contact.LabelParentLouveteauJeannette)
+			case string(PositionScout), string(PositionGuide):
+				legalGuardianContact.AddLabel(contact.LabelParentScoutGuide)
+			case string(PositionPionnier), string(PositionCaravelle):
+				legalGuardianContact.AddLabel(contact.LabelParentPionnierCaravelle)
+			case string(PositionCompagnon):
+				legalGuardianContact.AddLabel(contact.LabelParentCompagnon)
+			default:
+				// no specific label
+			}
+
 			contacts = append(contacts, *legalGuardianContact)
 		}
 	}
