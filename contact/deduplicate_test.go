@@ -156,8 +156,8 @@ func TestAreDuplicates(t *testing.T) {
 				LastName:  "Doe",
 			},
 			contact2: &Contact{
-				FirstName: "Jon", // One typo
-				LastName:  "Do",  // One typo
+				FirstName: "Jon",  // One typo
+				LastName:  "Doez", // One typo
 			},
 			expected: true,
 		},
