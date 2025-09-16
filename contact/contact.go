@@ -17,5 +17,5 @@ type Contact struct {
 	Phones       map[PhoneType]string // Numéros de téléphone par type
 	Position     string
 	Labels       []Label
-	UpdatedAt    time.Time
+	UpdatedAt    *time.Time
 }

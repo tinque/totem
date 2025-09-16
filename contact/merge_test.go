@@ -140,6 +140,169 @@ func TestContact_MergeContact(t *testing.T) {
 				Birthday:  &birthday1, // Conservé
 			},
 		},
+		{
+			name: "Fusion intelligente - source plus récent écrase les données",
+			destination: &Contact{
+				FirstName: "John",
+				LastName:  "OldName",
+				City:      "OldCity",
+				UpdatedAt: func() *time.Time { t := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC); return &t }(),
+				Emails: map[EmailType]string{
+					EmailPersonal: "old@email.com",
+				},
+			},
+			source: &Contact{
+				FirstName: "Jane",
+				LastName:  "NewName",
+				City:      "NewCity",
+				UpdatedAt: func() *time.Time { t := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC); return &t }(),
+				Emails: map[EmailType]string{
+					EmailPersonal:      "new@email.com",
+					EmailDedicatedSGDF: "jane@sgdf.org",
+				},
+			},
+			expected: &Contact{
+				FirstName: "Jane",    // Écrasé car source plus récent
+				LastName:  "NewName", // Écrasé car source plus récent
+				City:      "NewCity", // Écrasé car source plus récent
+				UpdatedAt: func() *time.Time { t := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC); return &t }(),
+				Emails: map[EmailType]string{
+					EmailPersonal:      "new@email.com", // Écrasé car source plus récent
+					EmailDedicatedSGDF: "jane@sgdf.org", // Ajouté
+				},
+			},
+		},
+		{
+			name: "Fusion conservative - destination plus récente conserve ses données",
+			destination: &Contact{
+				FirstName: "John",
+				LastName:  "NewName",
+				City:      "NewCity",
+				UpdatedAt: func() *time.Time { t := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC); return &t }(),
+				Emails: map[EmailType]string{
+					EmailPersonal: "new@email.com",
+				},
+			},
+			source: &Contact{
+				FirstName: "Jane",
+				LastName:  "OldName",
+				City:      "OldCity",
+				ZipCode:   "12345", // Nouveau champ
+				UpdatedAt: func() *time.Time { t := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC); return &t }(),
+				Emails: map[EmailType]string{
+					EmailPersonal:      "old@email.com",
+					EmailDedicatedSGDF: "jane@sgdf.org", // Nouveau email
+				},
+			},
+			expected: &Contact{
+				FirstName: "John",    // Conservé car destination plus récente
+				LastName:  "NewName", // Conservé car destination plus récente
+				City:      "NewCity", // Conservé car destination plus récente
+				ZipCode:   "12345",   // Ajouté car vide dans destination
+				UpdatedAt: func() *time.Time { t := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC); return &t }(),
+				Emails: map[EmailType]string{
+					EmailPersonal:      "new@email.com", // Conservé car destination plus récente
+					EmailDedicatedSGDF: "jane@sgdf.org", // Ajouté car absent dans destination
+				},
+			},
+		},
+		{
+			name: "Source avec UpdatedAt vs destination sans UpdatedAt - source écrase",
+			destination: &Contact{
+				FirstName: "John",
+				LastName:  "OldName",
+				City:      "OldCity",
+				UpdatedAt: nil, // Pas de date (ancien contact)
+				Emails: map[EmailType]string{
+					EmailPersonal: "old@email.com",
+				},
+			},
+			source: &Contact{
+				FirstName: "Jane",
+				LastName:  "NewName",
+				City:      "NewCity",
+				UpdatedAt: func() *time.Time { t := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC); return &t }(),
+				Emails: map[EmailType]string{
+					EmailPersonal:      "new@email.com",
+					EmailDedicatedSGDF: "jane@sgdf.org",
+				},
+			},
+			expected: &Contact{
+				FirstName: "Jane",    // Écrasé car source a UpdatedAt
+				LastName:  "NewName", // Écrasé car source a UpdatedAt
+				City:      "NewCity", // Écrasé car source a UpdatedAt
+				UpdatedAt: func() *time.Time { t := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC); return &t }(),
+				Emails: map[EmailType]string{
+					EmailPersonal:      "new@email.com", // Écrasé car source a UpdatedAt
+					EmailDedicatedSGDF: "jane@sgdf.org", // Ajouté
+				},
+			},
+		},
+		{
+			name: "Destination avec UpdatedAt vs source sans UpdatedAt - merge conservateur",
+			destination: &Contact{
+				FirstName: "John",
+				LastName:  "NewName",
+				City:      "NewCity",
+				UpdatedAt: func() *time.Time { t := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC); return &t }(),
+				Emails: map[EmailType]string{
+					EmailPersonal: "new@email.com",
+				},
+			},
+			source: &Contact{
+				FirstName: "Jane",
+				LastName:  "OldName",
+				City:      "OldCity",
+				ZipCode:   "12345", // Nouveau champ
+				UpdatedAt: nil,     // Pas de date (ancien contact)
+				Emails: map[EmailType]string{
+					EmailPersonal:      "old@email.com",
+					EmailDedicatedSGDF: "jane@sgdf.org", // Nouveau email
+				},
+			},
+			expected: &Contact{
+				FirstName: "John",    // Conservé car destination a UpdatedAt
+				LastName:  "NewName", // Conservé car destination a UpdatedAt
+				City:      "NewCity", // Conservé car destination a UpdatedAt
+				ZipCode:   "12345",   // Ajouté car vide dans destination
+				UpdatedAt: func() *time.Time { t := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC); return &t }(),
+				Emails: map[EmailType]string{
+					EmailPersonal:      "new@email.com", // Conservé car destination a UpdatedAt
+					EmailDedicatedSGDF: "jane@sgdf.org", // Ajouté car absent dans destination
+				},
+			},
+		},
+		{
+			name: "Aucun contact n'a UpdatedAt - merge conservateur",
+			destination: &Contact{
+				FirstName: "John",
+				LastName:  "Existing",
+				UpdatedAt: nil,
+				Emails: map[EmailType]string{
+					EmailPersonal: "existing@email.com",
+				},
+			},
+			source: &Contact{
+				FirstName: "Jane",  // Ne devrait pas écraser
+				LastName:  "New",   // Ne devrait pas écraser
+				ZipCode:   "12345", // Devrait être ajouté
+				UpdatedAt: nil,
+				Emails: map[EmailType]string{
+					EmailPersonal:      "new@email.com", // Ne devrait pas écraser
+					EmailDedicatedSGDF: "jane@sgdf.org", // Devrait être ajouté
+				},
+			},
+			expected: &Contact{
+				FirstName: "John",     // Conservé (merge conservateur)
+				LastName:  "Existing", // Conservé (merge conservateur)
+				ZipCode:   "12345",    // Ajouté car vide
+				UpdatedAt: nil,
+				Emails: map[EmailType]string{
+					EmailPersonal:      "existing@email.com", // Conservé (merge conservateur)
+					EmailDedicatedSGDF: "jane@sgdf.org",      // Ajouté car absent
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -253,6 +416,7 @@ func TestMergeContacts(t *testing.T) {
 
 func TestCopyContact(t *testing.T) {
 	birthday := time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)
+	updatedAt := time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
 
 	tests := []struct {
 		name     string
@@ -271,6 +435,7 @@ func TestCopyContact(t *testing.T) {
 				FirstName:    "John",
 				LastName:     "Doe",
 				Birthday:     &birthday,
+				UpdatedAt:    &updatedAt,
 				Address:      "123 Rue de la Paix",
 				City:         "Paris",
 				ZipCode:      "75000",
@@ -291,6 +456,7 @@ func TestCopyContact(t *testing.T) {
 				FirstName:    "John",
 				LastName:     "Doe",
 				Birthday:     &birthday,
+				UpdatedAt:    &updatedAt,
 				Address:      "123 Rue de la Paix",
 				City:         "Paris",
 				ZipCode:      "75000",
@@ -346,6 +512,14 @@ func TestCopyContact(t *testing.T) {
 					*tt.original.Birthday = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 					if result.Birthday != nil && result.Birthday.Year() == 2000 {
 						t.Error("copyContact() did not create a deep copy - Birthday was modified")
+					}
+				}
+
+				// Test avec UpdatedAt
+				if tt.original.UpdatedAt != nil {
+					*tt.original.UpdatedAt = time.Date(2000, 12, 31, 23, 59, 59, 0, time.UTC)
+					if result.UpdatedAt != nil && result.UpdatedAt.Year() == 2000 {
+						t.Error("copyContact() did not create a deep copy - UpdatedAt was modified")
 					}
 				}
 			}

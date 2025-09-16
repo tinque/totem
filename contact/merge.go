@@ -3,88 +3,140 @@ package contact
 import "slices"
 
 // MergeContact merges the source contact into the destination contact.
-// The source contact's data completes or replaces the destination's data
-// according to the merge logic defined for each field.
+// The merge strategy depends on UpdatedAt timestamps:
+// - A contact with UpdatedAt is always considered newer than one without UpdatedAt
+// - If source has UpdatedAt but destination doesn't, source's non-empty data replaces destination's data
+// - If destination has UpdatedAt but source doesn't, source's data only fills empty fields
+// - If both have UpdatedAt, the one with the more recent timestamp determines the strategy
+// - If neither has UpdatedAt, source's data only fills empty fields (conservative merge)
 func (c *Contact) MergeContact(source *Contact) {
 	if source == nil {
 		return
 	}
 
-	// CodeAdherant: keeps the destination value, merges only if empty
-	if c.CodeAdherant == "" && source.CodeAdherant != "" {
+	// Determine merge strategy based on UpdatedAt timestamps
+	// A contact with UpdatedAt is always newer than one without
+	sourceIsNewer := false
+	if source.UpdatedAt != nil && c.UpdatedAt == nil {
+		// Source has UpdatedAt but destination doesn't -> source is newer
+		sourceIsNewer = true
+	} else if c.UpdatedAt != nil && source.UpdatedAt == nil {
+		// Destination has UpdatedAt but source doesn't -> destination is newer
+		sourceIsNewer = false
+	} else if c.UpdatedAt != nil && source.UpdatedAt != nil {
+		// Both have UpdatedAt -> compare timestamps
+		sourceIsNewer = source.UpdatedAt.After(*c.UpdatedAt)
+	}
+	// If both are nil, sourceIsNewer remains false (conservative merge)
+
+	// CodeAdherant: merge based on strategy
+	if sourceIsNewer && source.CodeAdherant != "" {
+		c.CodeAdherant = source.CodeAdherant
+	} else if c.CodeAdherant == "" && source.CodeAdherant != "" {
 		c.CodeAdherant = source.CodeAdherant
 	}
 
-	// FirstName: keeps the destination value, merges only if empty
-	if c.FirstName == "" && source.FirstName != "" {
+	// FirstName: merge based on strategy
+	if sourceIsNewer && source.FirstName != "" {
+		c.FirstName = source.FirstName
+	} else if c.FirstName == "" && source.FirstName != "" {
 		c.FirstName = source.FirstName
 	}
 
-	// LastName: keeps the destination value, merges only if empty
-	if c.LastName == "" && source.LastName != "" {
+	// LastName: merge based on strategy
+	if sourceIsNewer && source.LastName != "" {
+		c.LastName = source.LastName
+	} else if c.LastName == "" && source.LastName != "" {
 		c.LastName = source.LastName
 	}
 
-	// Emails: merges the maps, source emails complete the destination
+	// Emails: merge maps based on strategy
 	if source.Emails != nil {
 		if c.Emails == nil {
 			c.Emails = make(map[EmailType]string)
 		}
 		for emailType, email := range source.Emails {
-			if email != "" && c.Emails[emailType] == "" {
-				c.Emails[emailType] = email
+			if email != "" {
+				if sourceIsNewer {
+					c.Emails[emailType] = email
+				} else if c.Emails[emailType] == "" {
+					c.Emails[emailType] = email
+				}
 			}
 		}
 	}
 
-	// Birthday: keeps the destination value, merges only if nil
-	if c.Birthday == nil && source.Birthday != nil {
+	// Birthday: merge based on strategy
+	if sourceIsNewer && source.Birthday != nil {
+		c.Birthday = source.Birthday
+	} else if c.Birthday == nil && source.Birthday != nil {
 		c.Birthday = source.Birthday
 	}
 
-	// Address: keeps the destination value, merges only if empty
-	if c.Address == "" && source.Address != "" {
+	// Address: merge based on strategy
+	if sourceIsNewer && source.Address != "" {
+		c.Address = source.Address
+	} else if c.Address == "" && source.Address != "" {
 		c.Address = source.Address
 	}
 
-	// City: keeps the destination value, merges only if empty
-	if c.City == "" && source.City != "" {
+	// City: merge based on strategy
+	if sourceIsNewer && source.City != "" {
+		c.City = source.City
+	} else if c.City == "" && source.City != "" {
 		c.City = source.City
 	}
 
-	// ZipCode: keeps the destination value, merges only if empty
-	if c.ZipCode == "" && source.ZipCode != "" {
+	// ZipCode: merge based on strategy
+	if sourceIsNewer && source.ZipCode != "" {
+		c.ZipCode = source.ZipCode
+	} else if c.ZipCode == "" && source.ZipCode != "" {
 		c.ZipCode = source.ZipCode
 	}
 
-	// Country: keeps the destination value, merges only if empty
-	if c.Country == "" && source.Country != "" {
+	// Country: merge based on strategy
+	if sourceIsNewer && source.Country != "" {
+		c.Country = source.Country
+	} else if c.Country == "" && source.Country != "" {
 		c.Country = source.Country
 	}
 
-	// Phones: merges the maps, source phones complete the destination
+	// Phones: merge maps based on strategy
 	if source.Phones != nil {
 		if c.Phones == nil {
 			c.Phones = make(map[PhoneType]string)
 		}
 		for phoneType, phone := range source.Phones {
-			if phone != "" && c.Phones[phoneType] == "" {
-				c.Phones[phoneType] = phone
+			if phone != "" {
+				if sourceIsNewer {
+					c.Phones[phoneType] = phone
+				} else if c.Phones[phoneType] == "" {
+					c.Phones[phoneType] = phone
+				}
 			}
 		}
 	}
 
-	// Position: keeps the destination value, merges only if empty
-	if c.Position == "" && source.Position != "" {
+	// Position: merge based on strategy
+	if sourceIsNewer && source.Position != "" {
+		c.Position = source.Position
+	} else if c.Position == "" && source.Position != "" {
 		c.Position = source.Position
 	}
 
-	// Labels: merges the slices, adds source labels not already present
+	// Labels: always merge (add source labels not already present)
 	if source.Labels != nil {
 		for _, label := range source.Labels {
 			if !slices.Contains(c.Labels, label) {
 				c.Labels = append(c.Labels, label)
 			}
+		}
+	}
+
+	// UpdatedAt: keep the most recent timestamp
+	if source.UpdatedAt != nil {
+		if c.UpdatedAt == nil || source.UpdatedAt.After(*c.UpdatedAt) {
+			c.UpdatedAt = source.UpdatedAt
 		}
 	}
 }
@@ -129,6 +181,12 @@ func copyContact(c *Contact) *Contact {
 	if c.Birthday != nil {
 		birthday := *c.Birthday
 		copied.Birthday = &birthday
+	}
+
+	// Copy UpdatedAt
+	if c.UpdatedAt != nil {
+		updatedAt := *c.UpdatedAt
+		copied.UpdatedAt = &updatedAt
 	}
 
 	// Copy emails

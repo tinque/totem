@@ -154,7 +154,8 @@ func extractIntranetMainContact(row parser.Row) (*contact.Contact, error) {
 		}
 	}
 
-	c.UpdatedAt = time.Now()
+	now := time.Now()
+	c.UpdatedAt = &now
 
 	return &c, nil
 }
@@ -243,9 +244,9 @@ func extractIntranetLegalGardianContact(row parser.Row, index int) (*contact.Con
 			c.SetPhone(contact.PhoneWork, v)
 		}
 	}
-
 	c.AddLabel(contact.LabelParent)
-	c.UpdatedAt = time.Now()
+	now := time.Now()
+	c.UpdatedAt = &now
 
 	return &c, nil
 }
