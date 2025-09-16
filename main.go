@@ -32,7 +32,9 @@ func main() {
 	}
 	defer f.Close()
 
-	rows, err := parser.FromReader(f)
+	test()
+
+	rows, err := parser.FromExcelHTMLReader(f)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error parsing file: %v\n", err)
 		os.Exit(2)
@@ -74,4 +76,21 @@ func main() {
 
 	fmt.Fprintln(os.Stderr, "wrote", outFile)
 
+}
+
+func test() {
+	f, err := os.Open("contacts.csv")
+	if err != nil {
+		log.Fatalf("error opening contacts.csv: %v", err)
+	}
+	defer f.Close()
+
+	rows, err := parser.FromCSVReader(f)
+	if err != nil {
+		log.Fatalf("error parsing contacts.csv: %v", err)
+	}
+
+	for row := range rows {
+		fmt.Println(row)
+	}
 }

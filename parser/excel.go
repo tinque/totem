@@ -14,8 +14,8 @@ import (
 // Format: header -> cell value
 type Row map[string]string
 
-// FromReader parses an intranet export and returns rows.
-func FromReader(r io.Reader) (iter.Seq[Row], error) {
+// FromExcelHTMLReader parses an intranet export (Excel HTML) and returns rows.
+func FromExcelHTMLReader(r io.Reader) (iter.Seq[Row], error) {
 	doc, err := html.Parse(r)
 	if err != nil {
 		return nil, fmt.Errorf("parse html: %w", err)

@@ -18,10 +18,10 @@ const sampleHTML = `<!doctype html>
   </body>
 </html>`
 
-func TestParseFromReader(t *testing.T) {
-	rows, err := FromReader(strings.NewReader(sampleHTML))
+func TestParseFromExcelHTMLReader(t *testing.T) {
+	rows, err := FromExcelHTMLReader(strings.NewReader(sampleHTML))
 	if err != nil {
-		t.Fatalf("FromReader failed: %v", err)
+		t.Fatalf("FromExcelHTMLReader failed: %v", err)
 	}
 
 	rowNumber := 0
