@@ -100,8 +100,8 @@ func mapPhonesToCSV(row []string, c contact.Contact) {
 		phoneType contact.PhoneType
 		label     string
 	}{
-		{contact.PhoneMobile1, "Mobile"},
-		{contact.PhoneMobile2, "Mobile"},
+		{contact.PhoneMobile1, "Mobile 1"},
+		{contact.PhoneMobile2, "Mobile 2"},
 		{contact.PhoneHome, "Domicile"},
 		{contact.PhoneWork, "Travail"},
 	}
@@ -125,6 +125,7 @@ func mapPhonesToCSV(row []string, c contact.Contact) {
 func CSVContact(c contact.Contact) []string {
 	row := make([]string, len(CSVHeader))
 
+	// Custom fields
 	if c.MemberCode != "" {
 		row[getHeaderIndex("Custom Field 1 - Label")] = "Code Adhérent"
 		row[getHeaderIndex("Custom Field 1 - Value")] = c.MemberCode
@@ -135,7 +136,7 @@ func CSVContact(c contact.Contact) []string {
 		row[getHeaderIndex("Custom Field 2 - Value")] = c.UpdatedAt.Format("2006-01-02 15:04:05")
 	}
 
-	// Informations de base
+	// Base information
 	row[getHeaderIndex("First Name")] = c.FirstName
 	row[getHeaderIndex("Last Name")] = c.LastName
 	row[getHeaderIndex("Organization Title")] = c.Position
@@ -144,10 +145,11 @@ func CSVContact(c contact.Contact) []string {
 	}
 	row[getHeaderIndex("Labels")] = strings.Join(c.LabelsAsStrings(), " ::: ")
 
+	// Emails and Phones
 	mapEmailsToCSV(row, c)
 	mapPhonesToCSV(row, c)
 
-	// Informations d'adresse
+	// Address information
 	row[getHeaderIndex("Address 1 - Label")] = "Domicile" // Address 1 - Label
 	row[getHeaderIndex("Address 1 - Street")] = c.Address
 	row[getHeaderIndex("Address 1 - Postal Code")] = c.ZipCode

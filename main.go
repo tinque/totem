@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/tinque/totem/contact"
 	"github.com/tinque/totem/gmail"
@@ -32,28 +33,19 @@ func main() {
 	}
 	defer f.Close()
 
-	test()
+	w := csv.NewWriter(os.Stdout)
 
-	rows, err := parser.FromExcelHTMLReader(f)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error parsing file: %v\n", err)
-		os.Exit(2)
-	}
+	cIList := contactFromIntranet(path)
+	cGList := contactFromGmail("contacts.csv")
 
-	cList := []contact.Contact{}
-	for row := range rows {
-		c, err := sgdf.ExtractIntranetContact(row)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error extracting contact: %v\n", err)
-			continue
-		}
-
-		cList = append(cList, c...)
-	}
-
+	cList := append(cIList, cGList...)
 	cList = contact.DeduplicateAndMergeContacts(cList)
 
-	w := csv.NewWriter(os.Stdout)
+	// Set the updated at timestamp
+	now := time.Now()
+	for i := range cList {
+		cList[i].UpdatedAt = &now
+	}
 
 	csvContent := [][]string{}
 	csvContent = append(csvContent, gmail.CSVHeader)
@@ -78,8 +70,38 @@ func main() {
 
 }
 
-func test() {
-	f, err := os.Open("contacts.csv")
+func contactFromIntranet(path string) []contact.Contact {
+	f, err := os.Open(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error opening file: %v\n", err)
+		os.Exit(2)
+	}
+	defer f.Close()
+
+	rows, err := parser.FromExcelHTMLReader(f)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error parsing file: %v\n", err)
+		os.Exit(2)
+	}
+
+	cList := []contact.Contact{}
+	for row := range rows {
+		c, err := sgdf.ExtractIntranetContact(row)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error extracting contact: %v\n", err)
+			continue
+		}
+
+		cList = append(cList, c...)
+	}
+
+	cList = contact.DeduplicateAndMergeContacts(cList)
+
+	return cList
+}
+
+func contactFromGmail(path string) []contact.Contact {
+	f, err := os.Open(path)
 	if err != nil {
 		log.Fatalf("error opening contacts.csv: %v", err)
 	}
@@ -90,7 +112,23 @@ func test() {
 		log.Fatalf("error parsing contacts.csv: %v", err)
 	}
 
+	cList := []contact.Contact{}
 	for row := range rows {
-		fmt.Println(row)
+		c, err := gmail.ExtractGmailContact(row)
+		if err != nil {
+			log.Printf("error extracting contact: %v", err)
+			continue
+		}
+
+		// clear labels
+		c.ClearManagedLabels()
+		c.RemoveLabel(contact.Label("Adhérant"))
+		c.RemoveLabel(contact.Label("* myContacts"))
+
+		cList = append(cList, c)
 	}
+
+	cList = contact.DeduplicateAndMergeContacts(cList)
+
+	return cList
 }

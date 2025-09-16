@@ -9,7 +9,6 @@ const LabelBureau Label = "Bureau"
 const LabelChefCheftaine Label = "Chef-Cheftaine"
 const LabelParent Label = "Parent"
 const LabelEquipeDeGroupe Label = "Equipe de groupe"
-const LabelAncien Label = "Ancien"
 
 const LabelFarfadet Label = "Farfadet"
 const LabelParentFarfadet Label = "Parent Farfadet"
@@ -48,6 +47,35 @@ func (c *Contact) RemoveLabel(label Label) {
 
 func (c *Contact) ClearLabels() {
 	c.Labels = nil
+}
+
+func (c *Contact) ClearManagedLabels() {
+	managedLabels := []Label{
+		LabelAdherent,
+		LabelBureau,
+		LabelChefCheftaine,
+		LabelParent,
+		LabelEquipeDeGroupe,
+		LabelFarfadet,
+		LabelParentFarfadet,
+		LabelResponsableFarfadet,
+		LabelLouveteauJeannette,
+		LabelParentLouveteauJeannette,
+		LabelChefCheftaineLouveteauJeannette,
+		LabelPionnierCaravelle,
+		LabelParentPionnierCaravelle,
+		LabelChefCheftainePionnierCaravelle,
+		LabelScoutGuide,
+		LabelParentScoutGuide,
+		LabelChefCheftaineScoutGuide,
+		LabelCompagnon,
+		LabelParentCompagnon,
+		LabelAccompagnateurCompagnon,
+	}
+
+	c.Labels = slices.DeleteFunc(c.Labels, func(l Label) bool {
+		return slices.Contains(managedLabels, l)
+	})
 }
 
 func (c *Contact) LabelsAsStrings() []string {
