@@ -49,6 +49,8 @@ func main() {
 		cList = append(cList, c...)
 	}
 
+	cList = contact.DeduplicateAndMergeContacts(cList)
+
 	w := csv.NewWriter(os.Stdout)
 
 	csvContent := [][]string{}
