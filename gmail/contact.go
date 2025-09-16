@@ -50,6 +50,10 @@ var CSVHeader = []string{
 	"Birthday",
 	"Notes",
 	"Labels",
+	"Custom Field 1 - Value",
+	"Custom Field 1 - Label",
+	"Custom Field 2 - Value",
+	"Custom Field 2 - Label",
 	// "Relation 1 - Label",
 	// "Relation 1 - Value",
 	// "Relation 2 - Label",
@@ -120,6 +124,16 @@ func mapPhonesToCSV(row []string, c contact.Contact) {
 
 func CSVContact(c contact.Contact) []string {
 	row := make([]string, len(CSVHeader))
+
+	if c.MemberCode != "" {
+		row[getHeaderIndex("Custom Field 1 - Label")] = "Code Adhérent"
+		row[getHeaderIndex("Custom Field 1 - Value")] = c.MemberCode
+	}
+
+	if c.UpdatedAt != nil {
+		row[getHeaderIndex("Custom Field 2 - Label")] = "Dernière mise à jour"
+		row[getHeaderIndex("Custom Field 2 - Value")] = c.UpdatedAt.Format("2006-01-02 15:04:05")
+	}
 
 	// Informations de base
 	row[getHeaderIndex("First Name")] = c.FirstName
