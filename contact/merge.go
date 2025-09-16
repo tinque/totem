@@ -29,11 +29,11 @@ func (c *Contact) MergeContact(source *Contact) {
 	}
 	// If both are nil, sourceIsNewer remains false (conservative merge)
 
-	// CodeAdherant: merge based on strategy
-	if sourceIsNewer && source.CodeAdherant != "" {
-		c.CodeAdherant = source.CodeAdherant
-	} else if c.CodeAdherant == "" && source.CodeAdherant != "" {
-		c.CodeAdherant = source.CodeAdherant
+	// MemberCode: merge based on strategy
+	if sourceIsNewer && source.MemberCode != "" {
+		c.MemberCode = source.MemberCode
+	} else if c.MemberCode == "" && source.MemberCode != "" {
+		c.MemberCode = source.MemberCode
 	}
 
 	// FirstName: merge based on strategy
@@ -167,14 +167,14 @@ func copyContact(c *Contact) *Contact {
 	}
 
 	copied := &Contact{
-		CodeAdherant: c.CodeAdherant,
-		FirstName:    c.FirstName,
-		LastName:     c.LastName,
-		Address:      c.Address,
-		City:         c.City,
-		ZipCode:      c.ZipCode,
-		Country:      c.Country,
-		Position:     c.Position,
+		MemberCode: c.MemberCode,
+		FirstName:  c.FirstName,
+		LastName:   c.LastName,
+		Address:    c.Address,
+		City:       c.City,
+		ZipCode:    c.ZipCode,
+		Country:    c.Country,
+		Position:   c.Position,
 	}
 
 	// Copy birthday

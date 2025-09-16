@@ -41,7 +41,7 @@ func extractIntranetMainContact(row parser.Row) (*contact.Contact, error) {
 	c := contact.Contact{}
 
 	if v, ok := row["IndividuCivilite.CodeAdherent"]; ok {
-		c.CodeAdherant = v
+		c.MemberCode = v
 		c.AddLabel(contact.LabelAdherent)
 	}
 	if v, ok := row["Individu.Prenom"]; ok {
@@ -169,7 +169,7 @@ func extractIntranetLegalGardianContact(row parser.Row, index int) (*contact.Con
 	}
 
 	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.CodeAdherent", index)]; ok {
-		c.CodeAdherant = v
+		c.MemberCode = v
 	}
 	if v, ok := row[fmt.Sprintf("RepresentantLegal%d.Prenom", index)]; ok {
 		c.FirstName = capitalizer.String(v)
