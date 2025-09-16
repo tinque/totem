@@ -104,3 +104,4 @@ $RECYCLE.BIN/
 *.xls
 *.xlsx
 *.csv
+build/
